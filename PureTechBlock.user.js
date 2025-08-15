@@ -9,6 +9,7 @@
 // @match           https://www.lacentrale.fr/*
 // @grant           GM_setValue
 // @grant           GM_getValue
+// @license         MIT
 // ==/UserScript==
 
 (function () {
