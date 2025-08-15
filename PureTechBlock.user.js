@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name            PurTechBlock
+// @name            PureTechBlock
 // @namespace       https://github.com/Hogwai/PureTechBlock/
 // @version         1.0
 // @description:en  Remove cards on lacentrale.fr containing a vehicle "PURETECH", "VTI" ou "THP", and also ads containers (.lcui-AdPlaceholder, appNexusPlaceholder
