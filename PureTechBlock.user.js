@@ -22,7 +22,7 @@
         const targetDivs = document.querySelectorAll('div[class*="vehiclecardV2_subTitle__"]');
 
         targetDivs.forEach(div => {
-            const textContent = div.textContent.trim();
+            const textContent = div.textContent.trim().toUpperCase();
             if (VEHICLE_KEYWORDS.some(keyword => textContent.includes(keyword))) {
                 const parentContainer = div.closest('.searchCard');
                 if (parentContainer) {
