@@ -26,11 +26,15 @@
         '#pavePubGallery'
     ];
 
-    let removedCount = 0;
-
     function scanAndClean() {
-        const vehicleCards = document.querySelectorAll('.searchCard:not([data-ptb-processed])');
+        let removedCount = 0;
+        const adContainers = document.querySelectorAll(AD_SELECTORS.join(', '));
+        adContainers.forEach(ad => {
+            ad.remove();
+            console.log(`[PureTechBlock] Ad removed : ${ad.className || ad.id}`);
+        });
 
+        const vehicleCards = document.querySelectorAll('.searchCard:not([data-ptb-processed])');
         vehicleCards.forEach(card => {
             card.setAttribute('data-ptb-processed', 'true');
 
@@ -43,12 +47,6 @@
                     console.log(`[PureTechBlock] Card removed : ${textContent.trim()}`);
                 }
             }
-        });
-
-        const adContainers = document.querySelectorAll(AD_SELECTORS.join(', '));
-        adContainers.forEach(ad => {
-            ad.remove();
-            console.log(`[PureTechBlock] Ad removed : ${ad.className || ad.id}`);
         });
 
         if (removedCount > 0) {
