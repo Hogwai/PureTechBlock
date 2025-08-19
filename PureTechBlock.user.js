@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            PureTechBlock
 // @namespace       https://github.com/Hogwai/PureTechBlock/
-// @version         1.0
+// @version         1.1
 // @description:en  Remove cards on lacentrale.fr containing a vehicle "PURETECH", "VTI" ou "THP", and also ads containers (.lcui-AdPlaceholder, appNexusPlaceholder
 // @description:fr  Enlève les annonces sur lacentrale.fr contenant un véhicle "PURETECH", "VTI" ou "THP", ainsi que les conteneurs de publicités (.lcui-AdPlaceholder, appNexusPlaceholder)
 // @author          Hogwai
@@ -17,64 +17,69 @@
 (function () {
     'use strict';
 
-    // Vehicle with these keywords will be removed
     const VEHICLE_KEYWORDS = ['PURETECH', 'VTI', 'THP'];
 
-    function removeVehicleCards() {
-        const targetDivs = document.querySelectorAll('div[class*="vehiclecardV2_subTitle__"]');
+    const AD_SELECTORS = [
+        '.lcui-AdPlaceholder',
+        '#pavePubDesktop',
+        '.appNexusPlaceholder',
+        '#pavePubGallery'
+    ];
 
-        targetDivs.forEach(div => {
-            const textContent = div.textContent.trim().toUpperCase();
-            if (VEHICLE_KEYWORDS.some(keyword => textContent.includes(keyword))) {
-                const parentContainer = div.closest('.searchCard');
-                if (parentContainer) {
-                    parentContainer.remove();
-                    console.log(textContent + " removed");
+    let removedCount = 0;
+
+    function scanAndClean() {
+        const vehicleCards = document.querySelectorAll('.searchCard:not([data-ptb-processed])');
+
+        vehicleCards.forEach(card => {
+            card.setAttribute('data-ptb-processed', 'true');
+
+            const subTitle = card.querySelector('div[class*="vehiclecardV2_subTitle__"]');
+            if (subTitle) {
+                const textContent = subTitle.textContent.trim().toUpperCase();
+                if (VEHICLE_KEYWORDS.some(keyword => textContent.includes(keyword))) {
+                    card.remove();
+                    removedCount++;
+                    console.log(`[PureTechBlock] Card removed : ${textContent.trim()}`);
                 }
             }
         });
-    }
 
-    function removeFrontalAd() {
-        const frontalAd = document.querySelector('.containerGlobal > .lcui-AdPlaceholder');
-        if (frontalAd) {
-            frontalAd.remove();
-        }
-    }
-
-    function removeAdsInResult() {
-        const frontalAdInResult = document.querySelector('.lcui-AdPlaceholder');
-        if (frontalAdInResult) {
-            frontalAdInResult.remove();
-        }
-        const bottomRightAd = document.getElementById('pavePubDesktop');
-        if(bottomRightAd) {
-            bottomRightAd.remove();
-        }
-    }
-
-    function removeInBetweenAds() {
-        const inBetweenCardsAds = document.querySelectorAll('div.appNexusPlaceholder');
-        inBetweenCardsAds.forEach(div => {
-            div.remove();
+        const adContainers = document.querySelectorAll(AD_SELECTORS.join(', '));
+        adContainers.forEach(ad => {
+            ad.remove();
+            console.log(`[PureTechBlock] Ad removed : ${ad.className || ad.id}`);
         });
-        console.log(inBetweenCardsAds.length + " in-between ads removed");
-    }
 
-
-    function waitForElementsAndRun() {
-        const removeDynamicAds = () => {
-            removeInBetweenAds();
-            removeVehicleCards();
-        };
-
-        if (document.readyState === "complete") {
-            removeFrontalAd();
-            removeAdsInResult();
-            // We have to wait a bit because cards are lazy-loaded
-            setTimeout(removeDynamicAds, 500);
+        if (removedCount > 0) {
+            console.log(`[PureTechBlock] Total of ${removedCount} elements removed.`);
         }
     }
 
-    waitForElementsAndRun();
+    function debounce(func, delay) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    const debouncedScanAndClean = debounce(scanAndClean, 300);
+
+    const observer = new MutationObserver((mutations) => {
+        const hasAddedNodes = mutations.some(mutation => mutation.addedNodes.length > 0);
+        if (hasAddedNodes) {
+            debouncedScanAndClean();
+        }
+    });
+
+    const observerConfig = {
+        childList: true,
+        subtree: true
+    };
+
+    observer.observe(document.body, observerConfig);
+
+    scanAndClean();
+
 })();
