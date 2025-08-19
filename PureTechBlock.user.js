@@ -10,6 +10,8 @@
 // @grant           GM_setValue
 // @grant           GM_getValue
 // @license         MIT
+// @downloadURL     https://update.greasyfork.org/scripts/545906/PureTechBlock.user.js
+// @updateURL       https://update.greasyfork.org/scripts/545906/PureTechBlock.meta.js
 // ==/UserScript==
 
 (function () {
@@ -40,6 +42,17 @@
         }
     }
 
+    function removeAdsInResult() {
+        const frontalAdInResult = document.querySelector('.lcui-AdPlaceholder');
+        if (frontalAdInResult) {
+            frontalAdInResult.remove();
+        }
+        const bottomRightAd = document.getElementById('pavePubDesktop');
+        if(bottomRightAd) {
+            bottomRightAd.remove();
+        }
+    }
+
     function removeInBetweenAds() {
         const inBetweenCardsAds = document.querySelectorAll('div.appNexusPlaceholder');
         inBetweenCardsAds.forEach(div => {
@@ -57,6 +70,7 @@
 
         if (document.readyState === "complete") {
             removeFrontalAd();
+            removeAdsInResult();
             // We have to wait a bit because cards are lazy-loaded
             setTimeout(removeDynamicAds, 500);
         }
